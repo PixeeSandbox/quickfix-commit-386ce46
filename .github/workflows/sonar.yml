@@ -1,0 +1,31 @@
+# Added by Pixee for C/C++ triage benchmarks (ISS-9982). Runs only on manual dispatch.
+name: Sonar scan
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: https://sonarcloud.io
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: sudo apt-get update && sudo apt-get install -y libssl-dev
+      - id: bw
+        uses: SonarSource/sonarqube-scan-action/install-build-wrapper@v8.4.1
+      - run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DHAVE_SSL=ON -DQUICKFIX_TESTS=OFF
+          "${{ steps.bw.outputs.build-wrapper-binary }}" --out-dir bw-output cmake --build build -j4
+      - uses: SonarSource/sonarqube-scan-action@v8.4.1
+        with:
+          args: >
+            -Dsonar.organization=pixee-sandbox
+            -Dsonar.projectKey=PixeeSandbox_quickfix-commit-386ce46
+            -Dsonar.sources=src,examples
+            -Dsonar.exclusions=build/**
+            -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
