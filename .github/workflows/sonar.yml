@@ -28,5 +28,5 @@ jobs:
             -Dsonar.organization=pixee-sandbox
             -Dsonar.projectKey=PixeeSandbox_quickfix-commit-386ce46
             -Dsonar.sources=src,examples
-            -Dsonar.exclusions=build/**
+            -Dsonar.exclusions=build/**,src/python/**,src/ruby/**
             -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
